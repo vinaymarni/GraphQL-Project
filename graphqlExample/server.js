@@ -1,11 +1,18 @@
 const express = require('express');
 const { buildSchema} = require('graphql');
 const { graphqlHTTP} = require('express-graphql');
+const axios = require("axios");
 const cors = require("cors"); 
 
 const app = express()
 
 const schema = buildSchema(`
+    type Post{
+        userId : ID
+        id: Int
+        title: String
+        body: String
+    }
 
     type User {
         name: String
@@ -13,14 +20,20 @@ const schema = buildSchema(`
         college: String
     }
 
-
     type Query {
         hello: String
         welcomeMessage(name: String!): String
         getUser: User
         getUsers: [User]
+        getPostsFromExtrenelAPI: [Post]
     }
-`)
+    input UserInput{
+        name: String! 
+        age: Int!
+        college: String!
+    }
+
+`);
 
 
 // resolvers that are implemented
@@ -44,25 +57,42 @@ const root ={
     getUsers:() =>{
         const users = [
             {
-                name: 'sai',
+                name: 'Vinay',
                 age : 25,
-                college: 'NMREC'
+                college: 'VSM'
             },
             {
-                name: 'santhosh',
+                name: 'Kumar',
                 age : 24,
                 college: 'NMREC'
             }
         ];
         return  users;
+    },
+    getPostsFromExtrenelAPI: async() =>{
+        const result = await axios
+       .get("https://jsonplaceholder.typicode.com/posts")
+       return result.data;
+    },
+    setMessage: ({newMessage}) =>{
+        message = newMessage;
+        return message;
+    },
+    message: () => message,
+
+    createUser: (args) =>{
+        // Creating user
+        console.log(args)
+        return args.user;
     }
+
 }
 
 
 app.use(
     cors({
       optionsSuccessStatus: 200, //option sucess status
-      origin: "http://localhost:3001", //origin allowed to access the server
+      origin: "http://localhost:3000", //origin allowed to access the server
     })
   );
 
